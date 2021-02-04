@@ -102,6 +102,7 @@ function loop(port) {
         });
         return Object.assign(me, {
             enter: function() {
+                console.log('wait network registration');
                 port.write('at+cereg?\r');
                 return this;
             },
