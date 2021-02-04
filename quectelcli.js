@@ -36,8 +36,9 @@ function loop(port) {
 }
 
 rl.on('line', line => {
+    console.log(line);
     if (line == 'OK\r')
-        console.log('OK');
+        console.log('+OK');
 });
 
 const port = new serialport(argv.device, {
