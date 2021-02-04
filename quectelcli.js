@@ -79,13 +79,17 @@ function loop(port) {
         const me = new Emitter();
         var timer = null;
 
+        const next = () => {
+            state = connectingState().enter();
+        };
+
         me.on('sock-closed', id => {
             if (timer) clearTimeout(timer);
-            if (id == cid) state = connectingState().enter();
+            if (id == cid) next();
         });
         me.on('sock-error', (id, err) => {
             if (timer) clearTimeout(timer);
-            if (id == cid) state = connectingState().enter();
+            if (id == cid) next();
         });
         return Object.assign(me, {
             enter: function() {
@@ -93,7 +97,7 @@ function loop(port) {
                 timer = setTimeout(() => {
                     timer = null;
                     console.log('closing timeout');
-                    state = connectingState().enter();
+                    next();
                 }, 3000);
                 return this;
             },
@@ -107,6 +111,7 @@ function loop(port) {
         });
         return Object.assign(me, {
             enter: function() {
+                console.log('connecting server');
                 port.write(`at+qiopen=${context},${cid},"TCP","${serverIp}",${serverPort},0,0\r`);
                 return this;
             },
