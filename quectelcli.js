@@ -174,7 +174,7 @@ rl.on('line', line => {
         em.emit('sock-data', +line.slice(15))
         return;
     }
-    if (! line.search(/\+CSQ: /)) {
+    if (! line.search(/\+csq: /)) {
         info = line.slice(6).split(',');
         em.emit('csq', +info[0], +info[1])
         return;
