@@ -3,6 +3,7 @@
 const stream = require('stream');
 const readline = require('readline');
 const Emitter = require('events').EventEmitter;
+const util = require('util');
 
 const serialport = require('serialport');
 const yargs = require('yargs');
@@ -35,9 +36,27 @@ const rl = readline.createInterface({
 const em = new Emitter();
 
 function loop(port) {
-    port.write('AT\r');
+    var state = null;
+
+    function startedState() {
+        const me = {};
+
+        util.inherits(me, Emitter);
+        me.on('ok', () => {
+            console.log('got ok');
+        });
+        return Object.assign(me, {
+            enter: function() {
+                port.write('AT\r');
+            },
+        });
+    }
+
+    state = startedState();
+    state.enter();
+
     em.on('ok', () => {
-        console.log('got ok');
+        if (state) state.emit('ok');
     });
 }
 
