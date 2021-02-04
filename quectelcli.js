@@ -46,11 +46,29 @@ function loop(port) {
 
         me.on('ok', () => {
             console.log('modem connected');
-            state = closingState().enter();
+            state = waitRssiState().enter();
         });
         return Object.assign(me, {
             enter: function() {
-                port.write('AT\r');
+                port.write('at\r');
+                return this;
+            },
+        });
+    }
+    function waitRssiState() {
+        me.on('csq', rssi => {
+            console.log('rssi', rssi);
+            if (rssi >= 8) {
+                state = closingState().enter();
+                return;
+            }
+            setTimeout(() => {
+                port.write('at+csq\r');
+            }, 1000);
+        });
+        return Object.assign(me, {
+            enter: function() {
+                port.write('at+csq\r');
                 return this;
             },
         });
@@ -72,7 +90,7 @@ function loop(port) {
                 port.write(`at+qiclose=${cid}\r`);
                 setTimeout(() => {
                     state = connectingState().enter();
-                }, 5000);
+                }, 3000);
                 return this;
             },
         });
@@ -117,6 +135,9 @@ function loop(port) {
     em.on('sock-data', function() {
         if (state) state.emit('sock-data', ...arguments);
     });
+    em.on('csq', function() {
+        if (state) state.emit('csq', ...arguments);
+    });
 }
 
 rl.on('line', line => {
@@ -149,6 +170,11 @@ rl.on('line', line => {
     }
     if (! line.search(/\+QIURC: "recv",/)) {
         em.emit('sock-data', +line.slice(15))
+        return;
+    }
+    if (! line.search(/\+CSQ: /)) {
+        info = line.slice(6).split(',');
+        em.emit('csq', +info[0], +info[1])
         return;
     }
 });
