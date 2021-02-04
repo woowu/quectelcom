@@ -90,7 +90,9 @@ function loop(port) {
         return Object.assign(me, {
             enter: function() {
                 port.write(`at+qiclose=${cid}\r`);
-                setTimeout(() => {
+                timer = setTimeout(() => {
+                    timer = null;
+                    console.log('closing timeout');
                     state = connectingState().enter();
                 }, 3000);
                 return this;
