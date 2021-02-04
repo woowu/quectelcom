@@ -85,7 +85,7 @@ function loop(port) {
             timer = null;
 
             const s = +info[4];
-            if (! s || s == 4)
+            if (! s)
                 state = connectingState().enter();
             else
                 state = closingState().enter();
