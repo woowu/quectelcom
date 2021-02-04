@@ -46,11 +46,27 @@ function loop(port) {
 
         me.on('ok', () => {
             console.log('modem connected');
-            state = connectingState().enter();
+            state = closingState().enter();
         });
         return Object.assign(me, {
             enter: function() {
                 port.write('AT\r');
+                return this;
+            },
+        });
+    }
+    function closingState() {
+        const me = new Emitter();
+
+        me.on('ok', () => {
+            state = connectingState().enter();
+        });
+        me.on('error', () => {
+            state = connectingState().enter();
+        });
+        return Object.assign(me, {
+            enter: function() {
+                port.write(`at+qiclose=${cid}\r`);
                 return this;
             },
         });
@@ -94,6 +110,10 @@ rl.on('line', line => {
     if (argv.verbose) console.log(Buffer.from(line));
     if (line == 'OK') {
         em.emit('ok');
+        return;
+    }
+    if (line == 'ERROR') {
+        em.emit('error');
         return;
     }
     if (! line.search('+QIOPEN: ')) {
