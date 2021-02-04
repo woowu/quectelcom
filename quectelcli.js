@@ -47,14 +47,22 @@ function loop(port) {
 
     function startedState() {
         const me = new Emitter();
+        var timer = null;
 
         me.on('ok', () => {
+            if (timer) {
+                clearTimeout(timer);
+                timer = null;
+            }
             console.log('modem connected');
             state = waitRssiState().enter();
         });
         return Object.assign(me, {
             enter: function() {
                 port.write('at\r');
+                timer = setTimeout(() => {
+                    port.write('at\r');
+                }, 2000);
                 return this;
             },
         });
@@ -65,7 +73,7 @@ function loop(port) {
         me.on('csq', rssi => {
             console.log('rssi', rssi);
             if (rssi >= 5) {
-                state = checkSockStatusState().enter();
+                state = waitRegState().enter();
                 return;
             }
             setTimeout(() => {
@@ -75,6 +83,26 @@ function loop(port) {
         return Object.assign(me, {
             enter: function() {
                 port.write('at+csq\r');
+                return this;
+            },
+        });
+    }
+    function waitRegState() {
+        const me = new Emitter();
+
+        me.on('cereg', state => {
+            console.log('cereg state', state);
+            if (state == 1 || state == 5) {
+                state = checkSockStatusState().enter();
+                return;
+            }
+            setTimeout(() => {
+                port.write('at+cereg?\r');
+            }, 2000);
+        });
+        return Object.assign(me, {
+            enter: function() {
+                port.write('at+cereg\r');
                 return this;
             },
         });
@@ -211,10 +239,17 @@ rl.on('line', line => {
             return;
         }
         em.emit('sock-error', cid, +info[1]);
+        return;
+    }
+    if (! line.search(/\+CEREG: /)) {
+        info = line.slice(8).split(',');
+        em.emit('cereg', +info[1]);
+        return;
     }
     if (! line.search(/\+QISTATE: /)) {
         info = line.slice(10).split(',');
         em.emit('sock-state', +info[0], info.slice(1));
+        return;
     }
     if (! line.search(/\+QIURC: "recv",/)) {
         em.emit('sock-data', +line.slice(15))
