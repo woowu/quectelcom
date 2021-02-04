@@ -211,6 +211,9 @@ function loop(port) {
     em.on('csq', function() {
         if (state) state.emit('csq', ...arguments);
     });
+    em.on('cereg', function() {
+        if (state) state.emit('cereg', ...arguments);
+    });
 }
 
 rl.on('line', line => {
