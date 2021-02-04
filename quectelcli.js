@@ -19,6 +19,9 @@ const argv = yargs(hideBin(process.argv))
     .default('b', 115200)
     .describe('b', 'baudrate')
 
+    .count('verbose')
+    .aliase('v', 'verbose')
+
     .demandOption(['d', 'b'])
     .help('h')
     .epilog('copyright 2021')
@@ -39,7 +42,7 @@ function loop(port) {
 }
 
 rl.on('line', line => {
-    console.log(Buffer.from(line));
+    if (argv.verbose) console.log(Buffer.from(line));
     if (line == 'OK')
         em.emit('ok');
 });
