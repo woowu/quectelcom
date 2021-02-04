@@ -58,11 +58,11 @@ function loop(port) {
     function closingState() {
         const me = new Emitter();
 
-        me.on('ok', () => {
-            state = connectingState().enter();
+        me.on('sock-closed', id => {
+            if (id == cid) state = connectingState().enter();
         });
-        me.on('error', () => {
-            state = connectingState().enter();
+        me.on('sock-error', (id, err) => {
+            if (id == cid) state = connectingState().enter();
         });
         return Object.assign(me, {
             enter: function() {
@@ -75,12 +75,7 @@ function loop(port) {
         const me = new Emitter();
 
         me.on('sock-opened', id => {
-            if (id != cid) {
-                console.log('bad cid', id);
-                return;
-            }
-            console.log(`conn ${id} opened`);
-            state = connectedState().enter();
+            if (id == cid) state = connectedState(id).enter();
         });
         return Object.assign(me, {
             enter: function() {
@@ -89,33 +84,39 @@ function loop(port) {
             },
         });
     }
-    function connectedState() {
+    function connectedState(id) {
         const me = new Emitter();
 
-        me.on('sock-data', id => {
-            console.log(`conn ${id} recved data.`);
+        me.on('sock-data', _id => {
+            if (_id == id) console.log(`conn ${id} recved data.`);
         });
         return Object.assign(me, {
             enter: function() {
-                port.write('at+qiopen=1,5,"TCP","116.6.51.98",9006,0,0\r');
+                console.log(`conn ${id} opened`);
                 return this;
             },
         });
     }
 
     var state = startedState().enter();
-    em.on('ok', param => {
-        if (state) state.emit('ok', param);
+    em.on('ok', function() {
+        if (state) state.emit('ok', ...arguments);
     });
-    em.on('sock-opened', param => {
-        if (state) state.emit('sock-opened', param);
+    em.on('sock-opened', function() {
+        if (state) state.emit('sock-opened', ...arguments);
     });
-    em.on('sock-data', param => {
-        if (state) state.emit('sock-data', param);
+    em.on('sock-closed', function() {
+        if (state) state.emit('sock-closed', ...arguments);
+    });
+    em.on('sock-data', function() {
+        if (state) state.emit('sock-data', ...arguments);
     });
 }
 
 rl.on('line', line => {
+    var info;
+    var cid;
+
     if (! line.trim().length) return;
     if (argv.verbose) console.log('< ' + line);
 
@@ -128,17 +129,22 @@ rl.on('line', line => {
         return;
     }
     if (! line.search(/\+QIOPEN: /)) {
-        const info = line.slice(9).split(',');
+        info = line.slice(9).split(',');
+        cid = +info[0];
         if (+info[1] == 0) {
-            em.emit('sock-opened', +info[0])
+            em.emit('sock-opened', cid)
             return;
         }
+        if (+info[1] == 567) {
+            em.emit('sock-closed', cid)
+            return;
+        }
+        em.emit('sock-error', cid, +info[1]);
     }
     if (! line.search(/\+QIURC: "recv",/)) {
         em.emit('sock-data', +line.slice(15))
         return;
     }
-    console.log('ignored', line);
 });
 
 const port = new serialport(argv.device, {
