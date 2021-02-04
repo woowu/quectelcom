@@ -110,7 +110,7 @@ function loop(port) {
 }
 
 rl.on('line', line => {
-    if (argv.verbose) console.log('> ' + line);
+    if (argv.verbose) console.log('< ' + line);
     if (! line.search(/OK/)) {
         em.emit('ok');
         return;
@@ -130,7 +130,6 @@ rl.on('line', line => {
         em.emit('sock-data', +line.slice(15))
         return;
     }
-    console.log(line);
 });
 
 const port = new serialport(argv.device, {
