@@ -20,7 +20,7 @@ const argv = yargs(hideBin(process.argv))
     .describe('b', 'baudrate')
 
     .count('verbose')
-    .aliase('v', 'verbose')
+    .alias('v', 'verbose')
 
     .demandOption(['d', 'b'])
     .help('h')
