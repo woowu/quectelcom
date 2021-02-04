@@ -116,7 +116,9 @@ function loop(port) {
         const me = new Emitter();
 
         me.on('sock-data', _id => {
-            if (_id == id) console.log(`conn ${id} recved data.`);
+            if (_id != id) return;
+            console.log(`conn ${id} recved data.`);
+            port.write(`at+qird=${id},1500\r`);
         });
         return Object.assign(me, {
             enter: function() {
