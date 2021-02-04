@@ -2,6 +2,7 @@
 'use strict';
 const stream = require('stream');
 const readline = require('readline');
+const Emitter = require('events').EventEmitter;
 
 const serialport = require('serialport');
 const yargs = require('yargs');
@@ -28,13 +29,14 @@ const inStream = new stream.PassThrough();
 const rl = readline.createInterface({
     input: inStream,
 });
+const em = new Emitter();
 
 function loop(port) {
     port.write('AT\r');
 }
 
 rl.on('line', line => {
-    if (line == 'OK\r\n')
+    if (line == 'OK\r')
         console.log('OK');
 });
 
