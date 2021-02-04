@@ -102,7 +102,7 @@ function loop(port) {
         });
         return Object.assign(me, {
             enter: function() {
-                port.write('at+cereg\r');
+                port.write('at+cereg?\r');
                 return this;
             },
         });
