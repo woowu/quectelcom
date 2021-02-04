@@ -104,14 +104,14 @@ function loop(port) {
     }
 
     var state = startedState().enter();
-    em.on('ok', () => {
-        if (state) state.emit('ok');
+    em.on('ok', param => {
+        if (state) state.emit('ok', param);
     });
-    em.on('sock-opened', () => {
-        if (state) state.emit('sock-opened');
+    em.on('sock-opened', param => {
+        if (state) state.emit('sock-opened', param);
     });
-    em.on('sock-data', () => {
-        if (state) state.emit('sock-data');
+    em.on('sock-data', param => {
+        if (state) state.emit('sock-data', param);
     });
 }
 
