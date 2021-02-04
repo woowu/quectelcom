@@ -29,6 +29,10 @@ const argv = yargs(hideBin(process.argv))
     .argv;
 
 const baud = argv.baud;
+const context = 1;  /* context id */
+const cid = 5;      /* connection id */
+const serverIp = "116.6.51.98"
+const serverPort = 9006;
 const inStream = new stream.PassThrough();
 const rl = readline.createInterface({
     input: inStream,
@@ -36,13 +40,13 @@ const rl = readline.createInterface({
 const em = new Emitter();
 
 function loop(port) {
-    var state = null;
 
     function startedState() {
         const me = new Emitter();
 
         me.on('ok', () => {
-            console.log('got ok');
+            console.log('modem connected');
+            state = connectingState().enter();
         });
         return Object.assign(me, {
             enter: function() {
@@ -51,9 +55,36 @@ function loop(port) {
             },
         });
     }
+    function connectingState() {
+        const me = new Emitter();
 
-    state = startedState().enter();
+        me.on('sock-opened', id => {
+            if (id != cid) return;
+            console.log(`conn ${id} opened`);
+            state = connectedState().enter();
+        });
+        return Object.assign(me, {
+            enter: function() {
+                port.write(`at+qiopen=${context},${cid},"TCP","${serverIp}",${serverPort},0,0\r`);
+                return this;
+            },
+        });
+    }
+    function connectedState() {
+        const me = new Emitter();
 
+        me.on('sock-data', id => {
+            console.log(`conn ${id} recved data.`);
+        });
+        return Object.assign(me, {
+            enter: function() {
+                port.write('at+qiopen=1,5,"TCP","116.6.51.98",9006,0,0\r');
+                return this;
+            },
+        });
+    }
+
+    var state = startedState().enter();
     em.on('ok', () => {
         if (state) state.emit('ok');
     });
@@ -61,8 +92,22 @@ function loop(port) {
 
 rl.on('line', line => {
     if (argv.verbose) console.log(Buffer.from(line));
-    if (line == 'OK')
+    if (line == 'OK') {
         em.emit('ok');
+        return;
+    }
+    if (! line.search('+QIOPEN: ')) {
+        const info = line.slice(9).split(',');
+        if (+info[1] == 0) {
+            em.emit('sock-opened', +info[0])
+            return;
+        }
+    }
+    if (! line.search('+QIURC: "recv",')) {
+        em.emit('sock-data', +line.slice(15))
+        return;
+    }
+    console.log(line);
 });
 
 const port = new serialport(argv.device, {
