@@ -47,5 +47,5 @@ const port = new serialport(argv.device, {
     loop(port);
 });
 port.on('data', data => {
-    inStream.write(data);
+    inStream.write(data.strim() + '\n');
 });
