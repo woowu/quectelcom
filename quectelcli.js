@@ -107,7 +107,7 @@ function loop(port) {
 }
 
 rl.on('line', line => {
-    if (argv.verbose) console.log(Buffer.from(line));
+    if (argv.verbose) console.log(line);
     if (! line.search(/OK/)) {
         em.emit('ok');
         return;
