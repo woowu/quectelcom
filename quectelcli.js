@@ -80,8 +80,8 @@ function loop(port) {
 
         me.on('sock-state', (id, info) => {
             if (id != cid) return;
-            const state = +info[4];
-            if (! state || state == 4)
+            const s = +info[4];
+            if (! s || s == 4)
                 state = connectingState().enter();
             else
                 state = closingState().enter();
@@ -116,7 +116,7 @@ function loop(port) {
                     timer = null;
                     console.log('closing timeout');
                     next();
-                }, 5000);
+                }, 10000);
                 return this;
             },
         });
