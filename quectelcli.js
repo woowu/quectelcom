@@ -56,6 +56,8 @@ function loop(port) {
         });
     }
     function waitRssiState() {
+        const me = new Emitter();
+
         me.on('csq', rssi => {
             console.log('rssi', rssi);
             if (rssi >= 8) {
