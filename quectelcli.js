@@ -34,7 +34,7 @@ function loop(port) {
 }
 
 rl.on('line', line => {
-    console.log(line);
+    console.log(line.trim());
 });
 
 const port = new serialport(argv.device, {
@@ -47,5 +47,5 @@ const port = new serialport(argv.device, {
     loop(port);
 });
 port.on('data', data => {
-    inStream.write(data.strim() + '\n');
+    inStream.write(data);
 });
