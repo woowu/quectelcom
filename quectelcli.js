@@ -39,7 +39,7 @@ function loop(port) {
     var state = null;
 
     function startedState() {
-        const me = Object.assign({}, new Emitter());
+        const me = new Emitter();
 
         me.on('ok', () => {
             console.log('got ok');
@@ -47,12 +47,12 @@ function loop(port) {
         return Object.assign(me, {
             enter: function() {
                 port.write('AT\r');
+                return this;
             },
         });
     }
 
-    state = startedState();
-    state.enter();
+    state = startedState().enter();
 
     em.on('ok', () => {
         if (state) state.emit('ok');
