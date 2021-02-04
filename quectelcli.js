@@ -107,6 +107,12 @@ function loop(port) {
     em.on('ok', () => {
         if (state) state.emit('ok');
     });
+    em.on('sock-opened', () => {
+        if (state) state.emit('sock-opened');
+    });
+    em.on('sock-data', () => {
+        if (state) state.emit('sock-data');
+    });
 }
 
 rl.on('line', line => {
@@ -130,6 +136,7 @@ rl.on('line', line => {
         em.emit('sock-data', +line.slice(15))
         return;
     }
+    console.log('ignored', line);
 });
 
 const port = new serialport(argv.device, {
