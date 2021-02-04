@@ -36,7 +36,7 @@ function loop(port) {
 }
 
 rl.on('line', line => {
-    console.log(line);
+    console.log(Buffer.from(line));
     if (line == 'OK\r')
         console.log('+OK');
 });
