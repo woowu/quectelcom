@@ -116,14 +116,14 @@ rl.on('line', line => {
         em.emit('error');
         return;
     }
-    if (! line.search('+QIOPEN: ')) {
+    if (! line.search('\+QIOPEN: ')) {
         const info = line.slice(9).split(',');
         if (+info[1] == 0) {
             em.emit('sock-opened', +info[0])
             return;
         }
     }
-    if (! line.search('+QIURC: "recv",')) {
+    if (! line.search('\+QIURC: "recv",')) {
         em.emit('sock-data', +line.slice(15))
         return;
     }
