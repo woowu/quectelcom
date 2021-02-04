@@ -39,9 +39,8 @@ function loop(port) {
     var state = null;
 
     function startedState() {
-        const me = {};
+        const me = Object.assign({}, new Emitter());
 
-        util.inherits(me, Emitter);
         me.on('ok', () => {
             console.log('got ok');
         });
