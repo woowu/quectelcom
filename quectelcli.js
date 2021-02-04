@@ -108,11 +108,11 @@ function loop(port) {
 
 rl.on('line', line => {
     if (argv.verbose) console.log(Buffer.from(line));
-    if (line == /OK/) {
+    if (! line.serach(/OK/)) {
         em.emit('ok');
         return;
     }
-    if (line == /ERROR/) {
+    if (! line.search(/ERROR/)) {
         em.emit('error');
         return;
     }
