@@ -94,7 +94,7 @@ function loop(port) {
             enter: function() {
                 timer = setTimeout(() => {
                     timer = null;
-                    state = connectingState().enter();
+                    state = closingState().enter();
                 }, 2000);
                 port.write(`at+qistate=${context},${cid}\r`);
                 return this;
