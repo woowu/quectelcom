@@ -77,9 +77,13 @@ function loop(port) {
     }
     function checkSockStatusState() {
         const me = new Emitter();
+        var timer = null;
 
         me.on('sock-state', (id, info) => {
             if (id != cid) return;
+            clearTimeout(timer);
+            timer = null;
+
             const s = +info[4];
             if (! s || s == 4)
                 state = connectingState().enter();
@@ -88,6 +92,10 @@ function loop(port) {
         });
         return Object.assign(me, {
             enter: function() {
+                timer = setTimeout(() => {
+                    timer = null;
+                    state = connectingState().enter();
+                }, 2000);
                 port.write(`at+qistate=${context},${cid}\r`);
                 return this;
             },
