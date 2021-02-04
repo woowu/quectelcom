@@ -1,5 +1,7 @@
 #!/usr/bin/node --harmony
 'use strict';
+const stream = require('stream');
+const readline = require('readline');
 
 const serialport = require('serialport');
 const yargs = require('yargs');
@@ -21,13 +23,19 @@ const argv = yargs(hideBin(process.argv))
     .epilog('copyright 2021')
     .argv;
 
-console.log(argv);
-process.exit(1);
 const baud = argv.baud;
+const inStream = new stream.PassThrough();
+const rl = readline.createInterface({
+    input: inStream,
+});
 
 function loop(port) {
     port.write('AT\r');
 }
+
+rl.on('line', line => {
+    console.log(line);
+});
 
 const port = new serialport(argv.device, {
     baudRate: baud,
@@ -39,6 +47,5 @@ const port = new serialport(argv.device, {
     loop(port);
 });
 port.on('data', data => {
-    console.log(data);
+    inStream.write(data);
 });
-

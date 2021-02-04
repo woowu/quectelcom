@@ -10,6 +10,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "crypto": "^1.0.1",
+    "net": "^1.0.2",
     "serialport": "^9.0.6",
     "yargs": "^16.2.0"
   }
