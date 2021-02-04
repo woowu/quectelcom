@@ -14,7 +14,7 @@ const argv = yargs(hideBin(process.argv))
 
     .number('intvl')
     .alias('i', 'intvl')
-    .default('i', 10)
+    .default('i', 1)
     .describe('i', 'data sending interval')
 
     .demandOption(['p'])

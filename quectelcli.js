@@ -39,6 +39,10 @@ const rl = readline.createInterface({
 });
 const em = new Emitter();
 
+/**
+ * This program assume a context = 1 had been previously 
+ * defined and activated on the modem.
+ */
 function loop(port) {
 
     function startedState() {
@@ -60,7 +64,7 @@ function loop(port) {
 
         me.on('csq', rssi => {
             console.log('rssi', rssi);
-            if (rssi >= 8) {
+            if (rssi >= 5) {
                 state = checkSockStatusState().enter();
                 return;
             }
