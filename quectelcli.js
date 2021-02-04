@@ -116,7 +116,7 @@ function loop(port) {
                     timer = null;
                     console.log('closing timeout');
                     next();
-                }, 3000);
+                }, 5000);
                 return this;
             },
         });
