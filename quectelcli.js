@@ -201,7 +201,7 @@ rl.on('line', line => {
         em.emit('sock-error', cid, +info[1]);
     }
     if (! line.search(/\+QISTATE: /)) {
-        info = line.slice(10).split(,);
+        info = line.slice(10).split(',');
         em.emit('sock-state', +info[0], info.slice(1));
     }
     if (! line.search(/\+QIURC: "recv",/)) {
