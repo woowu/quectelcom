@@ -75,7 +75,10 @@ function loop(port) {
         const me = new Emitter();
 
         me.on('sock-opened', id => {
-            if (id != cid) return;
+            if (id != cid) {
+                console.log('bad cid', id);
+                return;
+            }
             console.log(`conn ${id} opened`);
             state = connectedState().enter();
         });
@@ -107,7 +110,7 @@ function loop(port) {
 }
 
 rl.on('line', line => {
-    if (argv.verbose) console.log(line);
+    if (argv.verbose) console.log('> ' + line);
     if (! line.search(/OK/)) {
         em.emit('ok');
         return;
