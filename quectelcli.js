@@ -57,16 +57,22 @@ function loop(port) {
     }
     function closingState() {
         const me = new Emitter();
+        var timer = null;
 
         me.on('sock-closed', id => {
+            if (timer) clearTimeout(timer);
             if (id == cid) state = connectingState().enter();
         });
         me.on('sock-error', (id, err) => {
+            if (timer) clearTimeout(timer);
             if (id == cid) state = connectingState().enter();
         });
         return Object.assign(me, {
             enter: function() {
                 port.write(`at+qiclose=${cid}\r`);
+                setTimeout(() => {
+                    state = connectingState().enter();
+                }, 5000);
                 return this;
             },
         });
