@@ -116,7 +116,9 @@ function loop(port) {
 }
 
 rl.on('line', line => {
+    if (! line.trim().length) return;
     if (argv.verbose) console.log('< ' + line);
+
     if (! line.search(/OK/)) {
         em.emit('ok');
         return;
