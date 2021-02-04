@@ -33,11 +33,15 @@ const em = new Emitter();
 
 function loop(port) {
     port.write('AT\r');
+    em.on('ok', () => {
+        console.log('got ok');
+    });
 }
 
 rl.on('line', line => {
     console.log(Buffer.from(line));
-    if (line == 'OK') console.log('+OK');
+    if (line == 'OK')
+        em.emit('ok');
 });
 
 const port = new serialport(argv.device, {
