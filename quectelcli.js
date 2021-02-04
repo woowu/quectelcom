@@ -88,7 +88,7 @@ function loop(port) {
         });
         return Object.assign(me, {
             enter: function() {
-                port.write(`at+qistate=,${cid}\r`);
+                port.write(`at+qistate=${context},${cid}\r`);
                 return this;
             },
         });
